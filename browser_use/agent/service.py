@@ -472,8 +472,8 @@ class Agent(Generic[Context, AgentStructuredOutput]):
 			self._last_known_downloads: list[str] = []
 			self.logger.info('📁 Initialized download tracking for agent')
 
-		self._external_pause_event = asyncio.Event()
-		self._external_pause_event.set()
+		self._pause_event = asyncio.Event()
+		self._pause_event.set()
 
 	@property
 	def logger(self) -> logging.Logger:
@@ -1616,7 +1616,7 @@ class Agent(Generic[Context, AgentStructuredOutput]):
 		self.state.history.save_to_file(file_path)
 
 	async def wait_until_resumed(self):
-		await self._external_pause_event.wait()
+		await self._pause_event.wait()
 
 	def pause(self) -> None:
 		"""Pause the agent before the next step"""
@@ -1624,7 +1624,7 @@ class Agent(Generic[Context, AgentStructuredOutput]):
 			'\n\n⏸️  Got [Ctrl+C], paused the agent and left the browser open.\n\tPress [Enter] to resume or [Ctrl+C] again to quit.'
 		)
 		self.state.paused = True
-		self._external_pause_event.clear()
+		self._pause_event.clear()
 
 		# Task paused
 
@@ -1636,7 +1636,7 @@ class Agent(Generic[Context, AgentStructuredOutput]):
 		print('----------------------------------------------------------------------')
 		print('▶️  Got Enter, resuming agent execution where it left off...\n')
 		self.state.paused = False
-		self._external_pause_event.set()
+		self._pause_event.set()
 
 		# Task resumed
 
