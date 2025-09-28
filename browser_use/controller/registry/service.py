@@ -11,6 +11,7 @@ from typing import Any, Generic, Optional, TypeVar, Union, get_args, get_origin
 from pydantic import BaseModel, Field, RootModel, create_model
 
 from browser_use.browser import BrowserSession
+from browser_use.browser.driver import BrowserDriverCapabilities
 from browser_use.browser.types import Page
 from browser_use.controller.registry.views import (
 	ActionModel,
@@ -320,12 +321,16 @@ class Registry(Generic[Context]):
 		file_system: FileSystem | None = None,
 		sensitive_data: dict[str, str | dict[str, str]] | None = None,
 		available_file_paths: list[str] | None = None,
+		driver_capabilities: BrowserDriverCapabilities | None = None,
 		#
 		context: Context | None = None,
 	) -> Any:
 		"""Execute a registered action with simplified parameter handling"""
 		if action_name not in self.registry.actions:
 			raise ValueError(f'Action {action_name} not found')
+
+		if driver_capabilities is not None:
+			driver_capabilities.require_action(action_name)
 
 		action = self.registry.actions[action_name]
 		try:

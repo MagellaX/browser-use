@@ -20,6 +20,7 @@ from pytest_httpserver.httpserver import HandlerType
 
 from browser_use.agent.views import ActionResult
 from browser_use.browser import BrowserSession
+from browser_use.browser.driver import BrowserDriverCapabilities, DriverActionCapability
 from browser_use.browser.profile import BrowserProfile
 from browser_use.browser.types import Page
 from browser_use.controller.registry.service import Registry
@@ -1226,3 +1227,22 @@ class TestParamsModelArgsAndKwargs:
 			# logger.info(f'Success with our fix! Result: {result3}')
 		except Exception as e:
 			logger.error(f'Error with our manual test: {str(e)}')
+
+
+class TestDriverCapabilityNegotiation:
+	async def test_action_requires_registered_capability(self, registry):
+		@registry.action('Restricted action gated by driver capabilities')
+		async def restricted_action():
+			return ActionResult(extracted_content='restricted-ok')
+
+		capabilities = BrowserDriverCapabilities(driver_name='stub-driver', driver_version='0.0.1')
+		capabilities.add_action(DriverActionCapability(action='restricted_action', description='native handler'))
+
+		ok_result = await registry.execute_action(
+			'restricted_action', {}, driver_capabilities=capabilities
+		)
+		assert ok_result.extracted_content == 'restricted-ok'
+
+		missing_capabilities = BrowserDriverCapabilities(driver_name='stub-driver')
+		with pytest.raises(AssertionError, match='restricted_action'):
+			await registry.execute_action('restricted_action', {}, driver_capabilities=missing_capabilities)

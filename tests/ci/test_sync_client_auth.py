@@ -3,6 +3,7 @@ Tests for OAuth2 device flow and cloud sync functionality.
 """
 
 import json
+import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
@@ -80,7 +81,8 @@ class TestDeviceAuthClient:
 
 		# Check file permissions (should be readable only by owner)
 		stat = (temp_config_dir / 'cloud_auth.json').stat()
-		assert oct(stat.st_mode)[-3:] == '600'
+		if os.name != 'nt':
+			assert oct(stat.st_mode)[-3:] == '600'
 
 	async def test_is_authenticated(self, temp_config_dir, httpserver):
 		"""Test authentication status check."""

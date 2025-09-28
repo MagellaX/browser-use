@@ -1256,6 +1256,7 @@ Explain the content of the page and that the requested information is not availa
 							file_system=file_system,
 							sensitive_data=sensitive_data,
 							available_file_paths=available_file_paths,
+							driver_capabilities=getattr(browser_session, 'driver_capabilities', None),
 							context=context,
 						)
 					except Exception as e:

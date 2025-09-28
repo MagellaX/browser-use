@@ -33,6 +33,7 @@ from playwright._impl._api_structures import ViewportSize
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, InstanceOf, PrivateAttr, model_validator
 from uuid_extensions import uuid7str
 
+from browser_use.browser.driver import BrowserDriver, BrowserDriverCapabilities
 from browser_use.browser.profile import BROWSERUSE_DEFAULT_CHANNEL, BrowserChannel, BrowserProfile
 from browser_use.browser.types import (
 	Browser,
@@ -300,6 +301,8 @@ class BrowserSession(BaseModel):
 	_auto_download_pdfs: bool = PrivateAttr(default=True)  # Auto-download PDFs when detected
 	_subprocess: Any = PrivateAttr(default=None)  # Chrome subprocess reference for error handling
 	_current_page_loading_status: str | None = PrivateAttr(default=None)  # Track loading status for current page
+	_driver_capabilities: BrowserDriverCapabilities | None = PrivateAttr(default=None)
+	_driver: BrowserDriver | None = PrivateAttr(default=None)
 
 	@model_validator(mode='after')
 	def apply_session_overrides_to_profile(self) -> Self:
@@ -336,6 +339,23 @@ class BrowserSession(BaseModel):
 		):  # keep updating the name pre-init because our id and str(self) can change
 			self._logger = logging.getLogger(f'browser_use.{self}')
 		return self._logger
+
+	@property
+	def driver_capabilities(self) -> BrowserDriverCapabilities | None:
+		"""Advertised driver capabilities associated with this session."""
+		return self._driver_capabilities
+
+	def set_driver_capabilities(self, capabilities: BrowserDriverCapabilities | None) -> None:
+		"""Attach a driver capability manifest to the session."""
+		self._driver_capabilities = capabilities
+
+	@property
+	def driver(self) -> BrowserDriver | None:
+		return self._driver
+
+	def attach_driver(self, driver: BrowserDriver) -> None:
+		self._driver = driver
+		self.set_driver_capabilities(driver.capabilities)
 
 	def __repr__(self) -> str:
 		is_copy = '©' if self._original_browser_session else '#'

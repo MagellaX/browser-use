@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from .browser import Browser, BrowserConfig
 	from .context import BrowserContext, BrowserContextConfig
+	from .driver import BrowserDriver, BrowserDriverCapabilities, DriverActionCapability, DriverFeature
 	from .profile import BrowserProfile
 	from .session import BrowserSession
 
@@ -15,6 +16,10 @@ _LAZY_IMPORTS = {
 	'BrowserContextConfig': ('.context', 'BrowserContextConfig'),
 	'BrowserProfile': ('.profile', 'BrowserProfile'),
 	'BrowserSession': ('.session', 'BrowserSession'),
+	'BrowserDriver': ('.driver', 'BrowserDriver'),
+	'BrowserDriverCapabilities': ('.driver', 'BrowserDriverCapabilities'),
+	'DriverActionCapability': ('.driver', 'DriverActionCapability'),
+	'DriverFeature': ('.driver', 'DriverFeature'),
 }
 
 
@@ -38,4 +43,15 @@ def __getattr__(name: str):
 	raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
-__all__ = ['Browser', 'BrowserConfig', 'BrowserContext', 'BrowserContextConfig', 'BrowserSession', 'BrowserProfile']
+__all__ = [
+	'Browser',
+	'BrowserConfig',
+	'BrowserContext',
+	'BrowserContextConfig',
+	'BrowserSession',
+	'BrowserProfile',
+	'BrowserDriver',
+	'BrowserDriverCapabilities',
+	'DriverActionCapability',
+	'DriverFeature',
+]
